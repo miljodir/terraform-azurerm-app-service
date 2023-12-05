@@ -253,6 +253,12 @@ variable "app_service_vnet_integration_subnet_id" {
   default     = null
 }
 
+variable "app_service_pe_subnet_id" {
+  description = "value of the subnet to associate the private endpoint with the Web App (Incoming traffic)"
+  type        = string
+  default     = null
+}
+
 variable "staging_slot_enabled" {
   type        = bool
   description = "Create a staging slot alongside the app service for blue/green deployment purposes. See documentation https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service_slot"
