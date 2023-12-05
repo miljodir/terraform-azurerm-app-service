@@ -1,33 +1,35 @@
-variable "location" {
-  description = "Azure location."
+variable "client_name" {
+  description = "Client name/account used in naming."
   type        = string
+  default     = "mdir"
+}
+
+variable "environment" {
+  description = "Project environment."
+  type        = string
+}
+
+variable "stack" {
+  description = "Project stack name."
+  type        = string
+}
+
+variable "resource_group_name" {
+  description = "Resource group name."
+  type        = string
+}
+
+variable "location" {
+  description = "Azure location for Function App and related resources."
+  type        = string
+  default     = "norwayeast"
 }
 
 variable "location_short" {
   description = "Short string for Azure location."
   type        = string
+  default     = "ne1"
 }
-
-variable "client_name" {
-  description = "Client name/account used in naming"
-  type        = string
-}
-
-variable "environment" {
-  description = "Project environment"
-  type        = string
-}
-
-variable "stack" {
-  description = "Project stack name"
-  type        = string
-}
-
-variable "resource_group_name" {
-  description = "Resource group name"
-  type        = string
-}
-
 variable "application_insights_sampling_percentage" {
   description = "Specifies the percentage of sampled datas for Application Insights. Documentation [here](https://docs.microsoft.com/en-us/azure/azure-monitor/app/sampling#ingestion-sampling)"
   type        = number
