@@ -255,7 +255,7 @@ variable "app_service_pe_subnet_id" {
 variable "staging_slot_enabled" {
   type        = bool
   description = "Create a staging slot alongside the app service for blue/green deployment purposes. See documentation https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/app_service_slot"
-  default     = true
+  default     = false
 }
 
 variable "staging_slot_custom_app_settings" {
