@@ -21,6 +21,11 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "workload" {
+  type        = string
+  description = "Name of the workload"
+}
+
 variable "service_plan_id" {
   description = "ID of the Service Plan that hosts the App Service"
   type        = string

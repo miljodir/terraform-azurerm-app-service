@@ -3,6 +3,10 @@ variable "resource_group_name" {
   type        = string
 }
 
+variable "workload" {
+  description = "Workload name."
+  type        = string
+}
 variable "location" {
   description = "Azure location for Function App and related resources."
   type        = string

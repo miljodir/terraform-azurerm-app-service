@@ -1,5 +1,5 @@
 locals {
-  unique_prefix = var.use_caf_naming ? compact(["${var.resource_group_name}${var.unique}", local.name_suffix]) : compact([var.resource_group_name, local.name_suffix])
+  unique_prefix = var.use_caf_naming ? compact(["${var.workload}${var.unique}", local.name_suffix]) : compact([var.workload, local.name_suffix])
 }
 
 data "azurecaf_name" "application_insights" {
