@@ -3,6 +3,12 @@ module "linux_web_app" {
 
   source = "./modules/linux-web-app"
 
+  providers = {
+    azurerm       = azurerm
+    azurerm.p-dns = azurerm.p-dns
+  }
+
+  workload            = var.workload
   location            = var.location
   location_short      = var.location_short
   resource_group_name = var.resource_group_name
@@ -61,6 +67,7 @@ module "linux_web_app" {
   application_insights_id                  = var.application_insights_id
   application_insights_enabled             = var.application_insights_enabled
   application_insights_type                = var.application_insights_type
+  application_insights_workspace_id        = var.application_insights_workspace_id
 
   app_service_logs = var.app_service_logs
 
@@ -78,6 +85,13 @@ module "container_web_app" {
   for_each = toset(lower(var.os_type) == "container" ? ["enabled"] : [])
 
   source = "./modules/container-web-app"
+
+  providers = {
+    azurerm       = azurerm
+    azurerm.p-dns = azurerm.p-dns
+  }
+
+  workload = var.workload
 
   unique              = var.unique
   location            = var.location
@@ -138,6 +152,7 @@ module "container_web_app" {
   application_insights_id                  = var.application_insights_id
   application_insights_enabled             = var.application_insights_enabled
   application_insights_type                = var.application_insights_type
+  application_insights_workspace_id        = var.application_insights_workspace_id
 
   app_service_logs = var.app_service_logs
 
@@ -155,6 +170,13 @@ module "windows_web_app" {
   for_each = toset(lower(var.os_type) == "windows" ? ["enabled"] : [])
 
   source = "./modules/windows-web-app"
+
+  providers = {
+    azurerm       = azurerm
+    azurerm.p-dns = azurerm.p-dns
+  }
+
+  workload = var.workload
 
   unique              = var.unique
   location            = var.location
@@ -212,6 +234,7 @@ module "windows_web_app" {
   application_insights_custom_name         = var.application_insights_custom_name
   application_insights_sampling_percentage = var.application_insights_sampling_percentage
   application_insights_id                  = var.application_insights_id
+  application_insights_workspace_id        = var.application_insights_workspace_id
   application_insights_enabled             = var.application_insights_enabled
   application_insights_type                = var.application_insights_type
 
