@@ -59,9 +59,6 @@ module "logs" {
   source  = "claranet/run/azurerm//modules/logs"
   version = "x.x.x"
 
-  client_name         = var.client_name
-  environment         = var.environment
-  stack               = var.stack
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
   resource_group_name = module.rg.resource_group_name
@@ -83,15 +80,12 @@ resource "azurerm_storage_share" "assets_share" {
 }
 
 module "service_plan" {
-  source  = "claranet/app-service-plan/azurerm"
+  source  = "miljodir/app-service-plan/azurerm"
   version = "x.x.x"
 
-  client_name         = var.client_name
-  environment         = var.environment
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
   resource_group_name = module.rg.resource_group_name
-  stack               = var.stack
 
   logs_destinations_ids = [
     module.logs.logs_storage_account_id,
@@ -103,15 +97,12 @@ module "service_plan" {
 }
 
 module "linux_web_app" {
-  source  = "claranet/app-service/azurerm//modules/linux-web-app"
+  source  = "miljodir/app-service/azurerm//modules/linux-web-app"
   version = "x.x.x"
 
-  client_name         = var.client_name
-  environment         = var.environment
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
   resource_group_name = module.rg.resource_group_name
-  stack               = var.stack
 
   service_plan_id = module.service_plan.service_plan_id
 
