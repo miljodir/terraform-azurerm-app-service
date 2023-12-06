@@ -6,6 +6,7 @@ resource "azurerm_application_insights" "app_insights" {
   resource_group_name = var.resource_group_name
 
   application_type = var.application_insights_type
+  workspace_id     = var.application_insights_workspace_id
 
   sampling_percentage = var.application_insights_sampling_percentage
 

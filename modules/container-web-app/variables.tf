@@ -55,6 +55,11 @@ variable "application_insights_type" {
   default     = "web"
 }
 
+variable "application_insights_workspace_id" {
+  description = "ID of the existing Log Analytics Workspace to use for storing Application Insights logs. Required if application_insights_enabled is true and an existing Application Insights is not used."
+  type        = string
+  default     = null
+}
 variable "app_settings" {
   description = "Application settings for App Service. See documentation https://www.terraform.io/docs/providers/azurerm/r/app_service.html#app_settings"
   type        = map(string)

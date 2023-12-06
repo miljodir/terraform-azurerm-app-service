@@ -3,11 +3,10 @@ locals {
 }
 
 data "azurecaf_name" "application_insights" {
-  #name          = local.name_suffix
   resource_type = "azurerm_application_insights"
-  prefixes      = compact([var.resource_group_name, local.name_suffix, var.unique])
+  prefixes      = compact([var.workload, local.name_suffix])
   suffixes      = compact([var.use_caf_naming ? "" : "ai"])
-  use_slug      = true
+  use_slug      = var.use_caf_naming
   clean_input   = true
   separator     = "-"
 }
@@ -15,7 +14,7 @@ data "azurecaf_name" "application_insights" {
 data "azurecaf_name" "app_service_web" {
   resource_type = "azurerm_app_service"
   prefixes      = local.unique_prefix
-  suffixes      = compact([var.use_caf_naming ? "" : "web"])
+  suffixes      = compact([var.use_caf_naming ? "" : "app"])
   use_slug      = var.use_caf_naming
   clean_input   = true
   separator     = "-"
