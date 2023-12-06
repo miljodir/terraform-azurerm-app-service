@@ -3,12 +3,10 @@ module "linux_web_app" {
 
   source = "./modules/linux-web-app"
 
-  client_name         = var.client_name
-  environment         = var.environment
   location            = var.location
   location_short      = var.location_short
   resource_group_name = var.resource_group_name
-  stack               = var.stack
+  unique              = var.unique
 
   use_caf_naming                  = var.use_caf_naming
   name_prefix                     = var.name_prefix
@@ -81,12 +79,10 @@ module "container_web_app" {
 
   source = "./modules/container-web-app"
 
-  client_name         = var.client_name
-  environment         = var.environment
+  unique              = var.unique
   location            = var.location
   location_short      = var.location_short
   resource_group_name = var.resource_group_name
-  stack               = var.stack
 
   use_caf_naming                  = var.use_caf_naming
   name_prefix                     = var.name_prefix
@@ -160,12 +156,10 @@ module "windows_web_app" {
 
   source = "./modules/windows-web-app"
 
-  client_name         = var.client_name
-  environment         = var.environment
+  unique              = var.unique
   location            = var.location
   location_short      = var.location_short
   resource_group_name = var.resource_group_name
-  stack               = var.stack
 
   use_caf_naming                  = var.use_caf_naming
   name_prefix                     = var.name_prefix

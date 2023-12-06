@@ -1,26 +1,19 @@
 variable "location" {
   description = "Azure location."
   type        = string
+  default     = "norwayeast"
 }
 
 variable "location_short" {
   description = "Short string for Azure location."
   type        = string
+  default     = "ne1"
 }
 
-variable "client_name" {
-  description = "Client name/account used in naming"
+variable "unique" {
+  description = "Unique string to ensure uniqueness of resources."
   type        = string
-}
-
-variable "environment" {
-  description = "Project environment"
-  type        = string
-}
-
-variable "stack" {
-  description = "Project stack name"
-  type        = string
+  default     = null
 }
 
 variable "resource_group_name" {

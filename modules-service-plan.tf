@@ -1,11 +1,8 @@
 # Service Plan
 module "service_plan" {
-  source  = "claranet/app-service-plan/azurerm"
-  version = "~> 6.2.0"
+  source  = "miljodir/app-service-plan/azurerm"
+  version = "~> 1.0"
 
-  client_name         = var.client_name
-  environment         = var.environment
-  stack               = var.stack
   resource_group_name = var.resource_group_name
   location            = var.location
   location_short      = var.location_short
