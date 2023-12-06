@@ -5,14 +5,12 @@ module "azure_region" {
   azure_region = var.azure_region
 }
 
-module "rg" {
-  source  = "claranet/rg/azurerm"
-  version = "x.x.x"
-
-  location    = module.azure_region.location
-  client_name = var.client_name
-  environment = var.environment
-  stack       = var.stack
+resource "azurerm_resource_group" "rg" {
+  name     = "my-rg"
+  location = module.azure_region.location
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 module "logs" {
