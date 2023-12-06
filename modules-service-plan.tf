@@ -4,6 +4,7 @@ module "service_plan" {
   version = "~> 1.0"
 
   resource_group_name = var.resource_group_name
+  workload            = var.workload
   location            = var.location
   location_short      = var.location_short
 
