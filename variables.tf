@@ -314,3 +314,9 @@ variable "identity" {
     identity_ids = []
   }
 }
+
+variable "web_app_key_vault_id" {
+  description = "ID of the existing key vault to grant read access to the web app identity."
+  type        = string
+  default     = null
+}

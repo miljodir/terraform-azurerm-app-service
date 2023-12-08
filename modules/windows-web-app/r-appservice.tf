@@ -680,3 +680,10 @@ resource "azurerm_app_service_custom_hostname_binding" "app_service_custom_hostn
   ssl_state           = lookup(azurerm_app_service_certificate.app_service_certificate, each.key, null) != null ? "SniEnabled" : null
   thumbprint          = lookup(azurerm_app_service_certificate.app_service_certificate, each.key, null) != null ? azurerm_app_service_certificate.app_service_certificate[each.key].thumbprint : try(data.azurerm_app_service_certificate.certificate[each.key].thumbprint, null)
 }
+
+resource "azurerm_role_assignment" "kv_secrets_user" {
+  count                = var.web_app_key_vault_id != null ? 1 : 0
+  scope                = var.web_app_key_vault_id
+  principal_id         = var.identity[0].principal_id
+  role_definition_name = "Key Vault Secrets User"
+}
