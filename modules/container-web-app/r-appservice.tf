@@ -667,6 +667,6 @@ resource "azurerm_app_service_custom_hostname_binding" "app_service_custom_hostn
 resource "azurerm_role_assignment" "kv_secrets_user" {
   count                = var.web_app_key_vault_id != null ? 1 : 0
   scope                = var.web_app_key_vault_id
-  principal_id         = var.identity[0].principal_id
+  principal_id         = azurerm_linux_web_app.app_service_linux_container.identity[0].principal_id
   role_definition_name = "Key Vault Secrets User"
 }
