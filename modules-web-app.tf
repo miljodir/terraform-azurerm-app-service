@@ -20,8 +20,9 @@ module "linux_web_app" {
   app_service_custom_name         = var.app_service_custom_name
   custom_diagnostic_settings_name = var.custom_diagnostic_settings_name
 
-  service_plan_id      = module.service_plan.service_plan_id
-  web_app_key_vault_id = var.web_app_key_vault_id
+  service_plan_id                = module.service_plan.service_plan_id
+  web_app_key_vault_id           = var.web_app_key_vault_id
+  skip_identity_role_assignments = var.skip_identity_role_assignments
 
   app_settings       = var.app_settings
   site_config        = var.site_config
@@ -105,9 +106,10 @@ module "container_web_app" {
   app_service_custom_name         = var.app_service_custom_name
   custom_diagnostic_settings_name = var.custom_diagnostic_settings_name
 
-  service_plan_id      = module.service_plan.service_plan_id
-  web_app_key_vault_id = var.web_app_key_vault_id
-  docker_image         = var.docker_image
+  service_plan_id                = module.service_plan.service_plan_id
+  web_app_key_vault_id           = var.web_app_key_vault_id
+  skip_identity_role_assignments = var.skip_identity_role_assignments
+  docker_image                   = var.docker_image
 
   app_settings       = var.app_settings
   site_config        = var.site_config
@@ -191,8 +193,9 @@ module "windows_web_app" {
   app_service_custom_name         = var.app_service_custom_name
   custom_diagnostic_settings_name = var.custom_diagnostic_settings_name
 
-  service_plan_id      = module.service_plan.service_plan_id
-  web_app_key_vault_id = var.web_app_key_vault_id
+  service_plan_id                = module.service_plan.service_plan_id
+  web_app_key_vault_id           = var.web_app_key_vault_id
+  skip_identity_role_assignments = var.skip_identity_role_assignments
 
   app_settings       = var.app_settings
   site_config        = var.site_config
