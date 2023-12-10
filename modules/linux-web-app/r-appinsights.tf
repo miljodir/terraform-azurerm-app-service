@@ -20,7 +20,7 @@ resource "azurerm_application_insights" "app_insights" {
 }
 
 resource "azurerm_role_assignment" "appinsights_publisher" {
-  count                = var.application_insights_enabled && var.identity != null ? 1 : 0
+  count                = var.application_insights_enabled && can(azurerm_linux_web_app.app_service_linux.identity[0]) ? 1 : 0
   scope                = local.app_insights.id
   principal_id         = azurerm_linux_web_app.app_service_linux.identity[0].principal_id
   role_definition_name = "Monitoring Metrics Publisher"
