@@ -74,9 +74,9 @@ resource "azurerm_windows_web_app" "app_service_windows" {
       dynamic "virtual_application" {
         for_each = lookup(site_config.value, "virtual_application", null) == null ? [] : ["virtual_application"]
         content {
-          physical_path = lookup(value.site_config.virtual_application, "physical_path", "site\\wwwroot")
-          preload       = lookup(value.site_config.virtual_application, "preload", false)
-          virtual_path  = lookup(value.site_config.virtual_application, "virtual_path", "/")
+          physical_path = lookup(local.site_config.virtual_application, "physical_path", "site\\wwwroot")
+          preload       = lookup(local.site_config.virtual_application, "preload", false)
+          virtual_path  = lookup(local.site_config.virtual_application, "virtual_path", "/")
         }
       }
 
@@ -425,9 +425,9 @@ resource "azurerm_windows_web_app_slot" "app_service_windows_slot" {
       dynamic "virtual_application" {
         for_each = lookup(site_config.value, "virtual_application", null) == null ? [] : ["virtual_application"]
         content {
-          physical_path = lookup(value.site_config.virtual_application, "physical_path", "site\\wwwroot")
-          preload       = lookup(value.site_config.virtual_application, "preload", false)
-          virtual_path  = lookup(value.site_config.virtual_application, "virtual_path", "/")
+          physical_path = lookup(local.site_config.virtual_application, "physical_path", "site\\wwwroot")
+          preload       = lookup(local.site_config.virtual_application, "preload", false)
+          virtual_path  = lookup(local.site_config.virtual_application, "virtual_path", "/")
         }
       }
 
