@@ -17,6 +17,10 @@ resource "azurerm_application_insights" "app_insights" {
       format("hidden-link:%s", local.app_service_id) = "Resource"
     },
   )
+
+  lifecycle {
+    ignore_changes = [application_type, name] # Do not recreate exisiting app insights
+  }
 }
 
 resource "azurerm_role_assignment" "appinsights_publisher" {
