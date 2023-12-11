@@ -35,7 +35,7 @@ output "app_service_site_credential" {
 
 output "app_service_identity_service_principal_id" {
   description = "Id of the Service principal identity of the App Service"
-  value       = azurerm_windows_web_app.app_service_windows.identity[0].principal_id
+  value       = try(azurerm_windows_web_app.app_service_windows.identity[0].principal_id, null)
 }
 
 output "app_service_slot_name" {
