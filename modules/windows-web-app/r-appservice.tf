@@ -432,9 +432,9 @@ resource "azurerm_windows_web_app_slot" "app_service_windows_slot" {
       }
 
       dynamic "cors" {
-        for_each = lookup(site_config.value, "cors", [])
+        for_each = lookup(site_config.value, "cors", null) == null ? [] : ["cors"]
         content {
-          allowed_origins     = cors.value.allowed_origins
+          allowed_origins     = lookup(cors.value, "allowed_origins", null)
           support_credentials = lookup(cors.value, "support_credentials", null)
         }
       }
