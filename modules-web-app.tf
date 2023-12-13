@@ -53,6 +53,7 @@ module "linux_web_app" {
 
   app_service_vnet_integration_subnet_id = var.app_service_vnet_integration_subnet_id
   app_service_pe_subnet_id               = var.app_service_pe_subnet_id
+  privatedns_resource_group_name         = var.privatedns_resource_group_name
 
   backup_enabled                   = var.backup_enabled
   backup_custom_name               = var.backup_custom_name
@@ -140,6 +141,7 @@ module "container_web_app" {
 
   app_service_vnet_integration_subnet_id = var.app_service_vnet_integration_subnet_id
   app_service_pe_subnet_id               = var.app_service_pe_subnet_id
+  privatedns_resource_group_name         = var.privatedns_resource_group_name
 
   backup_enabled                   = var.backup_enabled
   backup_custom_name               = var.backup_custom_name
@@ -226,6 +228,7 @@ module "windows_web_app" {
 
   app_service_vnet_integration_subnet_id = var.app_service_vnet_integration_subnet_id
   app_service_pe_subnet_id               = var.app_service_pe_subnet_id
+  privatedns_resource_group_name         = var.privatedns_resource_group_name
 
   backup_enabled                   = var.backup_enabled
   backup_custom_name               = var.backup_custom_name

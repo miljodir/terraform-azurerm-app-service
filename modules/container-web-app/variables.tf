@@ -330,3 +330,9 @@ variable "skip_identity_role_assignments" {
   type        = bool
   default     = false
 }
+
+variable "privatedns_resource_group_name" {
+  description = "Name of the resource group where the private dns records are located."
+  type        = string
+  default     = "p-dns-pri"
+}

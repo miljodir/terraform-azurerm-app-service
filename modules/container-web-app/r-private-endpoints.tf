@@ -22,7 +22,7 @@ resource "azurerm_private_dns_a_record" "main" {
   count               = var.app_service_pe_subnet_id != null ? 1 : 0
   name                = azurerm_linux_web_app.app_service_linux_container.name
   records             = [azurerm_private_endpoint.main_pe[0].private_service_connection[0].private_ip_address]
-  resource_group_name = "p-dns-pri"
+  resource_group_name = var.privatedns_resource_group_name
   ttl                 = 600
   zone_name           = "privatelink.azurewebsites.net"
 
@@ -33,7 +33,7 @@ resource "azurerm_private_dns_a_record" "main_scm" {
   count               = var.app_service_pe_subnet_id != null ? 1 : 0
   name                = "${azurerm_linux_web_app.app_service_linux_container.name}.scm"
   records             = [azurerm_private_endpoint.main_pe[0].private_service_connection[0].private_ip_address]
-  resource_group_name = "p-dns-pri"
+  resource_group_name = var.privatedns_resource_group_name
   ttl                 = 600
   zone_name           = "privatelink.azurewebsites.net"
 
