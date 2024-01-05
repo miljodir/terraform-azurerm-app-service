@@ -17,7 +17,7 @@ variable "service_plan_id" {
 }
 
 locals {
-  service_plan_id = var.service_plan_id != null ? var.service_plan_id : module.service_plan.service_plan_id
+  service_plan_id = var.service_plan_id != null ? var.service_plan_id : module.service_plan["enabled"].service_plan_id
 }
 
 variable "app_service_environment_id" {
