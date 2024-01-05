@@ -59,7 +59,7 @@ module "windows_web_app" {
   location_short      = module.azure_region.location_short
   resource_group_name = module.rg.resource_group_name
 
-  service_plan_id = module.service_plan.service_plan_id
+  service_plan_id = local.service_plan_id
 
   app_settings = {
     FOO = "bar"

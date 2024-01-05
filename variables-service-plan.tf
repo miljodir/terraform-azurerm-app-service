@@ -10,6 +10,15 @@ variable "sku_name" {
   default     = "B1"
 }
 
+variable "service_plan_id" {
+  description = "ID of the existing Service Plan that hosts the App Service. Leave empty to create a new plan."
+  type        = string
+}
+
+locals {
+  service_plan_id = try(var.service_plan_id, module.service_plan.service_plan_id)
+}
+
 variable "app_service_environment_id" {
   description = "The ID of the App Service Environment to create this Service Plan in. Requires an Isolated SKU. Use one of I1, I2, I3 for azurerm_app_service_environment, or I1v2, I2v2, I3v2 for azurerm_app_service_environment_v3"
   type        = string

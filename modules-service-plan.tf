@@ -1,7 +1,8 @@
 # Service Plan
 module "service_plan" {
-  source  = "miljodir/app-service-plan/azurerm"
-  version = "~> 1.0"
+  for_each = toset(var.service_plan_id == null ? ["enabled"] : [])
+  source   = "miljodir/app-service-plan/azurerm"
+  version  = "~> 1.0"
 
   resource_group_name = var.resource_group_name
   workload            = var.workload
@@ -32,4 +33,9 @@ module "service_plan" {
     var.extra_tags,
     var.service_plan_extra_tags,
   )
+}
+
+moved {
+  from = module.service_plan
+  to   = module.service_plan["enabled"]
 }
