@@ -685,5 +685,6 @@ resource "azurerm_role_assignment" "kv_secrets_user" {
   count                = var.web_app_key_vault_id != null && var.skip_identity_role_assignments == false ? 1 : 0
   scope                = var.web_app_key_vault_id
   principal_id         = azurerm_linux_web_app.app_service_linux.identity[0].principal_id
+  principal_type       = "ServicePrincipal"
   role_definition_name = "Key Vault Secrets User"
 }
