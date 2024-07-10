@@ -4,8 +4,10 @@ resource "azurerm_linux_web_app" "app_service_linux" {
   resource_group_name = var.resource_group_name
   service_plan_id     = var.service_plan_id
 
-  public_network_access_enabled = var.public_network_access_enabled
-  virtual_network_subnet_id     = var.app_service_vnet_integration_subnet_id
+  public_network_access_enabled                  = var.public_network_access_enabled
+  virtual_network_subnet_id                      = var.app_service_vnet_integration_subnet_id
+  ftp_publish_basic_authentication_enabled       = lookup(local.site_config, "ftp_publish_basic_authentication_enabled", false)
+  webdeploy_publish_basic_authentication_enabled = lookup(local.site_config, "webdeploy_publish_basic_authentication_enabled", false)
 
   dynamic "site_config" {
     for_each = [local.site_config]
@@ -349,8 +351,10 @@ resource "azurerm_linux_web_app_slot" "app_service_linux_slot" {
   name           = local.staging_slot_name
   app_service_id = azurerm_linux_web_app.app_service_linux.id
 
-  public_network_access_enabled = var.public_network_access_enabled
-  virtual_network_subnet_id     = var.app_service_vnet_integration_subnet_id
+  public_network_access_enabled                  = var.public_network_access_enabled
+  virtual_network_subnet_id                      = var.app_service_vnet_integration_subnet_id
+  ftp_publish_basic_authentication_enabled       = lookup(local.site_config, "ftp_publish_basic_authentication_enabled", false)
+  webdeploy_publish_basic_authentication_enabled = lookup(local.site_config, "webdeploy_publish_basic_authentication_enabled", false)
 
   dynamic "site_config" {
     for_each = [local.site_config]
