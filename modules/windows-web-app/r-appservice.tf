@@ -20,10 +20,10 @@ resource "azurerm_windows_web_app" "app_service_windows" {
       default_documents        = lookup(site_config.value, "default_documents", null)
       ftps_state               = lookup(site_config.value, "ftps_state", "Disabled")
       health_check_path        = lookup(site_config.value, "health_check_path", null)
-      http2_enabled            = lookup(site_config.value, "http2_enabled", null)
+      http2_enabled            = lookup(site_config.value, "http2_enabled", startswith(local.app_service_name, "d-") ? true : null)
       local_mysql_enabled      = lookup(site_config.value, "local_mysql_enabled", false)
       managed_pipeline_mode    = lookup(site_config.value, "managed_pipeline_mode", null)
-      minimum_tls_version      = lookup(site_config.value, "minimum_tls_version", lookup(site_config.value, "min_tls_version", "1.2"))
+      minimum_tls_version      = lookup(site_config.value, "min_tls_version", startswith(local.app_service_name, "d-") ? "1.3" : "1.2")
       remote_debugging_enabled = lookup(site_config.value, "remote_debugging_enabled", false)
       remote_debugging_version = lookup(site_config.value, "remote_debugging_version", null)
       use_32_bit_worker        = lookup(site_config.value, "use_32_bit_worker", false)
@@ -56,7 +56,7 @@ resource "azurerm_windows_web_app" "app_service_windows" {
       }
 
       scm_type                    = lookup(site_config.value, "scm_type", null)
-      scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", "1.2")
+      scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", startswith(local.app_service_name, "d-") ? "1.3" : "1.2")
       scm_use_main_ip_restriction = (length(var.scm_authorized_ips) > 0 || var.scm_authorized_subnet_ids != null) && var.app_service_pe_subnet_id == null ? false : true
 
       vnet_route_all_enabled = var.app_service_vnet_integration_subnet_id != null
@@ -373,10 +373,10 @@ resource "azurerm_windows_web_app_slot" "app_service_windows_slot" {
       default_documents        = lookup(site_config.value, "default_documents", null)
       ftps_state               = lookup(site_config.value, "ftps_state", "Disabled")
       health_check_path        = lookup(site_config.value, "health_check_path", null)
-      http2_enabled            = lookup(site_config.value, "http2_enabled", null)
+      http2_enabled            = lookup(site_config.value, "http2_enabled", startswith(local.app_service_name, "d-") ? true : null)
       local_mysql_enabled      = lookup(site_config.value, "local_mysql_enabled", false)
       managed_pipeline_mode    = lookup(site_config.value, "managed_pipeline_mode", null)
-      minimum_tls_version      = lookup(site_config.value, "minimum_tls_version", lookup(site_config.value, "min_tls_version", "1.2"))
+      minimum_tls_version      = lookup(site_config.value, "min_tls_version", startswith(local.app_service_name, "d-") ? "1.3" : "1.2")
       remote_debugging_enabled = lookup(site_config.value, "remote_debugging_enabled", false)
       remote_debugging_version = lookup(site_config.value, "remote_debugging_version", null)
       use_32_bit_worker        = lookup(site_config.value, "use_32_bit_worker", false)
@@ -409,7 +409,7 @@ resource "azurerm_windows_web_app_slot" "app_service_windows_slot" {
       }
 
       scm_type                    = lookup(site_config.value, "scm_type", null)
-      scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", "1.2")
+      scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", startswith(local.app_service_name, "d-") ? "1.3" : "1.2")
       scm_use_main_ip_restriction = length(var.scm_authorized_ips) > 0 || var.scm_authorized_subnet_ids != null || var.app_service_pe_subnet_id == null ? false : true
 
       vnet_route_all_enabled = var.app_service_vnet_integration_subnet_id != null
