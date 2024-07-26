@@ -60,7 +60,7 @@ resource "azurerm_linux_web_app" "app_service_linux_container" {
       scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", "1.2")
       scm_use_main_ip_restriction = (length(var.scm_authorized_ips) > 0 || var.scm_authorized_subnet_ids != null) && var.app_service_pe_subnet_id == null ? false : true
 
-      vnet_route_all_enabled = var.app_service_vnet_integration_subnet_id != null
+      vnet_route_all_enabled = lookup(site_config.value, "vnet_route_all_enabled", var.app_service_vnet_integration_subnet_id != null)
 
       application_stack {
         docker_image     = var.docker_image.name
@@ -397,7 +397,7 @@ resource "azurerm_linux_web_app_slot" "app_service_linux_container_slot" {
       scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", "1.2")
       scm_use_main_ip_restriction = (length(var.scm_authorized_ips) > 0 || var.scm_authorized_subnet_ids != null) && var.app_service_pe_subnet_id == null ? false : true
 
-      vnet_route_all_enabled = var.app_service_vnet_integration_subnet_id != null
+      vnet_route_all_enabled = lookup(site_config.value, "vnet_route_all_enabled", var.app_service_vnet_integration_subnet_id != null)
 
       application_stack {
         docker_image     = var.docker_image.name
