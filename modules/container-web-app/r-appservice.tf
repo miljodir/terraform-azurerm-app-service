@@ -63,8 +63,10 @@ resource "azurerm_linux_web_app" "app_service_linux_container" {
       vnet_route_all_enabled = lookup(site_config.value, "vnet_route_all_enabled", var.app_service_vnet_integration_subnet_id != null)
 
       application_stack {
-        docker_image     = var.docker_image.name
-        docker_image_tag = var.docker_image.tag
+        docker_image_name        = format("%s:%s", var.docker_image.name, var.docker_image.tag)
+        docker_registry_url      = var.docker_image.registry
+        docker_registry_username = var.docker_image.registry_username
+        docker_registry_password = var.docker_image.registry_password
       }
 
       dynamic "cors" {
@@ -400,8 +402,10 @@ resource "azurerm_linux_web_app_slot" "app_service_linux_container_slot" {
       vnet_route_all_enabled = lookup(site_config.value, "vnet_route_all_enabled", var.app_service_vnet_integration_subnet_id != null)
 
       application_stack {
-        docker_image     = var.docker_image.name
-        docker_image_tag = coalesce(var.docker_image.slot_tag, var.docker_image.tag)
+        docker_image_name        = format("%s:%s", var.docker_image.name, coalesce(var.docker_image.slot_tag, var.docker_image.tag))
+        docker_registry_url      = var.docker_image.registry
+        docker_registry_username = var.docker_image.registry_username
+        docker_registry_password = var.docker_image.registry_password
       }
 
       dynamic "cors" {
