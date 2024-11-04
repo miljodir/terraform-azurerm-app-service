@@ -59,7 +59,7 @@ resource "azurerm_linux_web_app" "app_service_linux" {
       scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", startswith(local.app_service_name, "d-") ? "1.3" : "1.2")
       scm_use_main_ip_restriction = (length(var.scm_authorized_ips) > 0 || var.scm_authorized_subnet_ids != null) && var.app_service_pe_subnet_id == null ? false : true
 
-      vnet_route_all_enabled = var.app_service_vnet_integration_subnet_id != null
+      vnet_route_all_enabled = lookup(site_config.value, "vnet_route_all_enabled", var.app_service_vnet_integration_subnet_id != null)
 
       dynamic "application_stack" {
         for_each = lookup(site_config.value, "application_stack", null) == null ? [] : ["application_stack"]
@@ -405,7 +405,7 @@ resource "azurerm_linux_web_app_slot" "app_service_linux_slot" {
       scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", startswith(local.app_service_name, "d-") ? "1.3" : "1.2")
       scm_use_main_ip_restriction = length(var.scm_authorized_ips) > 0 || var.scm_authorized_subnet_ids != null || var.app_service_pe_subnet_id == null ? false : true
 
-      vnet_route_all_enabled = var.app_service_vnet_integration_subnet_id != null
+      vnet_route_all_enabled = lookup(site_config.value, "vnet_route_all_enabled", var.app_service_vnet_integration_subnet_id != null)
 
       dynamic "application_stack" {
         for_each = lookup(site_config.value, "application_stack", null) == null ? [] : ["application_stack"]
