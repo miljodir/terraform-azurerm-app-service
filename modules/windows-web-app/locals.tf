@@ -1,7 +1,6 @@
 locals {
   default_site_config = {
     always_on               = "true"
-    scm_minimum_tls_version = "1.2"
   }
 
   site_config = merge(local.default_site_config, var.site_config)
