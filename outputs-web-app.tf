@@ -12,3 +12,8 @@ output "app_service_windows" {
   description = "App Service Windows (Windows WebApp) output object if Windows is choosen. Please refer to `./modules/windows-web-app/README.md`"
   value       = try(module.windows_web_app["enabled"], null)
 }
+
+output "name_suffix" {
+  description = "Suffix to append to the App Service name"
+  value       = var.name_suffix
+}
