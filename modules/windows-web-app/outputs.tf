@@ -104,3 +104,8 @@ output "application_insights_application_type" {
   description = "Application Type of the Application Insights associated to the App Service"
   value       = try(local.app_insights.application_type, null)
 }
+
+output "name_suffix" {
+  description = "name suffix of the app service"
+  value = var.name_suffix
+}
