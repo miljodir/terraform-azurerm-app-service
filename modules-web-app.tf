@@ -1,3 +1,15 @@
+locals {
+  public_network_access_enabled = split("-", var.workload)[0] == "d" ? true : var.public_network_access_enabled ? true : false
+  scm_authorized_ips            = local.public_network_access_enabled ? try(concat(values(module.network_vars[0].known_public_ips), var.scm_authorized_ips), (values(module.network_vars[0].known_public_ips))) : []
+  authorized_ips                = local.public_network_access_enabled ? try(concat(values(module.network_vars[0].known_public_ips), var.authorized_ips), (values(module.network_vars[0].known_public_ips))) : []
+}
+
+module "network_vars" {
+  # private module used for public IP whitelisting
+  count  = local.public_network_access_enabled == true ? 1 : 0
+  source = "git@github.com:miljodir/cp-shared.git//modules/public_nw_ips?ref=public_nw_ips/v1"
+}
+
 module "linux_web_app" {
   for_each = toset(lower(var.os_type) == "linux" ? ["enabled"] : [])
 
@@ -41,13 +53,13 @@ module "linux_web_app" {
   staging_slot_custom_app_settings = var.staging_slot_custom_app_settings
 
   custom_domains                = var.custom_domains
-  public_network_access_enabled = var.public_network_access_enabled
-  authorized_ips                = var.authorized_ips
+  public_network_access_enabled = local.public_network_access_enabled
+  authorized_ips                = local.authorized_ips
   ip_restriction_headers        = var.ip_restriction_headers
   authorized_subnet_ids         = var.authorized_subnet_ids
   authorized_service_tags       = var.authorized_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_authorized_ips            = var.scm_authorized_ips
+  scm_authorized_ips            = local.scm_authorized_ips
   scm_authorized_subnet_ids     = var.scm_authorized_subnet_ids
   scm_authorized_service_tags   = var.scm_authorized_service_tags
 
@@ -129,13 +141,13 @@ module "container_web_app" {
   staging_slot_custom_app_settings = var.staging_slot_custom_app_settings
 
   custom_domains                = var.custom_domains
-  public_network_access_enabled = var.public_network_access_enabled
-  authorized_ips                = var.authorized_ips
+  public_network_access_enabled = local.public_network_access_enabled
+  authorized_ips                = local.authorized_ips
   ip_restriction_headers        = var.ip_restriction_headers
   authorized_subnet_ids         = var.authorized_subnet_ids
   authorized_service_tags       = var.authorized_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_authorized_ips            = var.scm_authorized_ips
+  scm_authorized_ips            = local.scm_authorized_ips
   scm_authorized_subnet_ids     = var.scm_authorized_subnet_ids
   scm_authorized_service_tags   = var.scm_authorized_service_tags
 
@@ -216,13 +228,13 @@ module "windows_web_app" {
   staging_slot_custom_app_settings = var.staging_slot_custom_app_settings
 
   custom_domains                = var.custom_domains
-  public_network_access_enabled = var.public_network_access_enabled
-  authorized_ips                = var.authorized_ips
+  public_network_access_enabled = local.public_network_access_enabled
+  authorized_ips                = local.authorized_ips
   ip_restriction_headers        = var.ip_restriction_headers
   authorized_subnet_ids         = var.authorized_subnet_ids
   authorized_service_tags       = var.authorized_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_authorized_ips            = var.scm_authorized_ips
+  scm_authorized_ips            = local.scm_authorized_ips
   scm_authorized_subnet_ids     = var.scm_authorized_subnet_ids
   scm_authorized_service_tags   = var.scm_authorized_service_tags
 

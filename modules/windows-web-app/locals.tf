@@ -1,6 +1,6 @@
 locals {
   default_site_config = {
-    always_on               = "true"
+    always_on = "true"
   }
 
   site_config = merge(local.default_site_config, var.site_config)
