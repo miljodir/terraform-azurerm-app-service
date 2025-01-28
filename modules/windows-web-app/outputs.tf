@@ -107,5 +107,5 @@ output "application_insights_application_type" {
 
 output "name_suffix" {
   description = "name suffix of the app service"
-  value = var.name_suffix
+  value       = var.name_suffix
 }
