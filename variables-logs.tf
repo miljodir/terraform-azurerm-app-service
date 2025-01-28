@@ -27,3 +27,4 @@ variable "custom_diagnostic_settings_name" {
   type        = string
   default     = "default"
 }
+

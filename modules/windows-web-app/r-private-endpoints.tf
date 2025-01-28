@@ -30,6 +30,13 @@ resource "azurerm_private_dns_a_record" "main" {
   zone_name           = "privatelink.azurewebsites.net"
 
   provider = azurerm.p-dns
+
+  lifecycle {
+    ignore_changes = [
+      ttl,
+      tags,
+    ]
+  }
 }
 
 resource "azurerm_private_dns_a_record" "main_scm" {
@@ -41,4 +48,11 @@ resource "azurerm_private_dns_a_record" "main_scm" {
   zone_name           = "privatelink.azurewebsites.net"
 
   provider = azurerm.p-dns
+
+  lifecycle {
+    ignore_changes = [
+      ttl,
+      tags,
+    ]
+  }
 }
