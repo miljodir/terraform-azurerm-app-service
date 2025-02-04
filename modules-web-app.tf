@@ -19,8 +19,7 @@ module "linux_web_app" {
   source = "./modules/linux-web-app"
 
   providers = {
-    azurerm       = azurerm
-    azurerm.p-dns = azurerm.p-dns
+    azurerm = azurerm
   }
 
   workload            = var.workload
@@ -105,8 +104,7 @@ module "container_web_app" {
   source = "./modules/container-web-app"
 
   providers = {
-    azurerm       = azurerm
-    azurerm.p-dns = azurerm.p-dns
+    azurerm = azurerm
   }
 
   workload = var.workload
@@ -193,8 +191,7 @@ module "windows_web_app" {
   source = "./modules/windows-web-app"
 
   providers = {
-    azurerm       = azurerm
-    azurerm.p-dns = azurerm.p-dns
+    azurerm = azurerm
   }
 
   workload = var.workload
