@@ -30,7 +30,8 @@ resource "azurerm_linux_web_app" "app_service_linux_container" {
       remote_debugging_version          = lookup(site_config.value, "remote_debugging_version", null)
       use_32_bit_worker                 = lookup(site_config.value, "use_32_bit_worker", false)
       websockets_enabled                = lookup(site_config.value, "websockets_enabled", false)
-      ip_restriction_default_action     = lookup(site_config.value, "ip_restriction_default_action", null)
+      ip_restriction_default_action     = lookup(site_config.value, "ip_restriction_default_action", "Deny")
+      scm_ip_restriction_default_action = lookup(site_config.value, "scm_ip_restriction_default_action", "Deny")
 
       dynamic "ip_restriction" {
         for_each = concat(local.subnets, local.cidrs, local.service_tags)
@@ -371,7 +372,8 @@ resource "azurerm_linux_web_app_slot" "app_service_linux_container_slot" {
       remote_debugging_version          = lookup(site_config.value, "remote_debugging_version", null)
       use_32_bit_worker                 = lookup(site_config.value, "use_32_bit_worker", false)
       websockets_enabled                = lookup(site_config.value, "websockets_enabled", false)
-      ip_restriction_default_action     = lookup(site_config.value, "ip_restriction_default_action", null)
+      ip_restriction_default_action     = lookup(site_config.value, "ip_restriction_default_action", "Deny")
+      scm_ip_restriction_default_action = lookup(site_config.value, "scm_ip_restriction_default_action", "Deny")
 
       dynamic "ip_restriction" {
         for_each = concat(local.subnets, local.cidrs, local.service_tags)
