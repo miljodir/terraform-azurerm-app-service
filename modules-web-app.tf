@@ -88,7 +88,8 @@ module "linux_web_app" {
 
   app_service_logs = var.app_service_logs
 
-  identity = var.identity
+  identity                = var.identity
+  vnet_image_pull_enabled = var.vnet_image_pull_enabled
 
   logs_destinations_ids   = var.logs_destinations_ids
   logs_categories         = var.logs_categories
@@ -175,7 +176,8 @@ module "container_web_app" {
 
   app_service_logs = var.app_service_logs
 
-  identity = var.identity
+  identity                = var.identity
+  vnet_image_pull_enabled = var.vnet_image_pull_enabled
 
   logs_destinations_ids   = var.logs_destinations_ids
   logs_categories         = var.logs_categories

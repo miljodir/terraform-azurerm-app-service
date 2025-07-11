@@ -339,3 +339,9 @@ variable "privatedns_resource_group_name" {
   type        = string
   default     = "p-dns-pri"
 }
+
+variable "vnet_image_pull_enabled" {
+  description = "Whether to enable VNet integration for image pulls."
+  type        = bool
+  default     = false
+}
