@@ -12,7 +12,7 @@ module "network_vars" {
   count  = local.public_network_access_enabled == true ? 1 : 0
   source = "git@github.com:miljodir/cp-shared.git//modules/public_nw_ips?ref=public_nw_ips/v1"
 }
-
+  
 module "linux_web_app" {
   for_each = toset(lower(var.os_type) == "linux" ? ["enabled"] : [])
 
