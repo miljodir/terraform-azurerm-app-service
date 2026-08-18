@@ -1,51 +1,39 @@
-module "azure_region" {
-  source  = "claranet/regions/azurerm"
-  version = "x.x.x"
-
-  azure_region = var.azure_region
-}
-
-module "rg" {
-  source  = "claranet/rg/azurerm"
-  version = "x.x.x"
-
-  location    = module.azure_region.location
-  client_name = var.client_name
-  environment = var.environment
-  stack       = var.stack
-}
-
-module "logs" {
-  source  = "claranet/run/azurerm//modules/logs"
-  version = "x.x.x"
-
-  location            = module.azure_region.location
-  location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
-}
-
 resource "azurerm_storage_account" "assets_storage" {
   account_replication_type = "LRS"
   account_tier             = "Standard"
   location                 = module.azure_region.location
   name                     = "appserviceassets"
-  resource_group_name      = module.rg.resource_group_name
+  resource_group_name      = module.rg.name
   min_tls_version          = "TLS1_2"
+
+  network_rules {
+    default_action             = "Deny"
+    bypass                     = ["AzureServices"]
+    ip_rules                   = []
+    virtual_network_subnet_ids = []
+  }
+
+  lifecycle { prevent_destroy = true }
 }
 
 resource "azurerm_storage_share" "assets_share" {
-  name                 = "assets"
-  storage_account_name = azurerm_storage_account.assets_storage.name
-  quota                = 50
+  name               = "assets"
+  storage_account_id = azurerm_storage_account.assets_storage.id
+  quota              = 50
+
+  lifecycle { prevent_destroy = true }
 }
 
 module "app_service" {
-  source  = "miljodir/app-service/azurerm"
+  source  = "claranet/app-service/azurerm"
   version = "x.x.x"
 
+  client_name         = var.client_name
+  environment         = var.environment
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
+  resource_group_name = module.rg.name
+  stack               = var.stack
 
   os_type  = "Linux"
   sku_name = "B2"
@@ -61,8 +49,8 @@ module "app_service" {
 
     http2_enabled = true
 
-    # The "AcrPull" role must be assigned to the managed identity in the target Azure Container Registry
-    acr_use_managed_identity_credentials = true
+    ip_restriction_default_action     = "Deny"
+    scm_ip_restriction_default_action = "Deny"
   }
 
   auth_settings = {
@@ -94,7 +82,7 @@ module "app_service" {
     }
   }
 
-  authorized_ips = ["1.2.3.4/32", "4.3.2.1/32"]
+  allowed_cidrs = ["1.2.3.4/32", "4.3.2.1/32"]
 
   ip_restriction_headers = {
     x_forwarded_host = ["myhost1.fr", "myhost2.fr"]
@@ -121,7 +109,7 @@ module "app_service" {
   ]
 
   logs_destinations_ids = [
-    module.logs.logs_storage_account_id,
-    module.logs.log_analytics_workspace_id,
+    module.run.logs_storage_account_id,
+    module.run.log_analytics_workspace_id,
   ]
 }

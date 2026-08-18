@@ -1,42 +1,46 @@
 locals {
-  public_network_access_enabled = split("-", var.workload)[0] == "d" ? true : var.public_network_access_enabled ? true : false
-  scm_authorized_ips = [for ip in(local.public_network_access_enabled ? try(concat(values(module.network_vars[0].known_public_ips), var.scm_authorized_ips), (values(module.network_vars[0].known_public_ips))) : []) :
-    can(regex(".*\\/\\d+$", ip)) ? ip : format("%s/32", ip)
+  public_network_access_enabled = lower(var.environment) == "d" || var.public_network_access_enabled
+
+  allowed_cidrs = [
+    for cidr in (
+      local.public_network_access_enabled
+      ? try(concat(values(module.network_vars[0].known_public_ips), var.allowed_cidrs), values(module.network_vars[0].known_public_ips))
+      : []
+    ) : can(regex(".*\\/\\d+$", cidr)) ? cidr : format("%s/32", cidr)
   ]
-  authorized_ips = [for ip in(local.public_network_access_enabled ? try(concat(values(module.network_vars[0].known_public_ips), var.authorized_ips), (values(module.network_vars[0].known_public_ips))) : []) :
-    can(regex(".*\\/\\d+$", ip)) ? ip : format("%s/32", ip)
+
+  scm_allowed_cidrs = [
+    for cidr in (
+      local.public_network_access_enabled
+      ? try(concat(values(module.network_vars[0].known_public_ips), var.scm_allowed_cidrs), values(module.network_vars[0].known_public_ips))
+      : []
+    ) : can(regex(".*\\/\\d+$", cidr)) ? cidr : format("%s/32", cidr)
   ]
 }
+
 module "network_vars" {
-  # private module used for public IP whitelisting
-  count  = local.public_network_access_enabled == true ? 1 : 0
+  count  = local.public_network_access_enabled ? 1 : 0
   source = "git@github.com:miljodir/cp-shared.git//modules/public_nw_ips?ref=public_nw_ips/v1"
 }
 
 module "linux_web_app" {
-  for_each = toset(lower(var.os_type) == "linux" ? ["enabled"] : [])
+  count = lower(var.os_type) == "linux" ? 1 : 0
 
   source = "./modules/linux-web-app"
 
-  providers = {
-    azurerm = azurerm
-  }
-
-  workload            = var.workload
+  client_name         = var.client_name
+  environment         = var.environment
   location            = var.location
   location_short      = var.location_short
   resource_group_name = var.resource_group_name
-  unique              = var.unique
+  stack               = var.stack
 
-  use_caf_naming                  = var.use_caf_naming
   name_prefix                     = var.name_prefix
   name_suffix                     = var.name_suffix
-  app_service_custom_name         = var.app_service_custom_name
-  custom_diagnostic_settings_name = var.custom_diagnostic_settings_name
+  custom_name                     = var.app_service_custom_name
+  diagnostic_settings_custom_name = var.diagnostic_settings_custom_name
 
-  service_plan_id                = local.service_plan_id
-  web_app_key_vault_id           = var.web_app_key_vault_id
-  skip_identity_role_assignments = var.skip_identity_role_assignments
+  service_plan_id = local.service_plan_id
 
   app_settings       = var.app_settings
   site_config        = var.site_config
@@ -46,6 +50,7 @@ module "linux_web_app" {
   sticky_settings    = var.sticky_settings
 
   mount_points               = var.mount_points
+  staging_slot_mount_points  = var.staging_slot_mount_points
   client_affinity_enabled    = var.client_affinity_enabled
   https_only                 = var.https_only
   client_certificate_enabled = var.client_certificate_enabled
@@ -53,43 +58,44 @@ module "linux_web_app" {
   staging_slot_enabled             = var.staging_slot_enabled
   staging_slot_custom_name         = var.staging_slot_custom_name
   staging_slot_custom_app_settings = var.staging_slot_custom_app_settings
+  staging_slot_site_config         = var.staging_slot_site_config
 
-  custom_domains                = var.custom_domains
+  custom_domains = var.custom_domains
+  certificates   = var.certificates
+
   public_network_access_enabled = local.public_network_access_enabled
-  authorized_ips                = local.authorized_ips
+  allowed_cidrs                 = local.allowed_cidrs
   ip_restriction_headers        = var.ip_restriction_headers
-  authorized_subnet_ids         = var.authorized_subnet_ids
-  authorized_service_tags       = var.authorized_service_tags
+  allowed_subnet_ids            = var.allowed_subnet_ids
+  allowed_service_tags          = var.allowed_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_authorized_ips            = local.scm_authorized_ips
-  scm_authorized_subnet_ids     = var.scm_authorized_subnet_ids
-  scm_authorized_service_tags   = var.scm_authorized_service_tags
+  scm_allowed_cidrs             = local.scm_allowed_cidrs
+  scm_allowed_subnet_ids        = var.scm_allowed_subnet_ids
+  scm_allowed_service_tags      = var.scm_allowed_service_tags
 
-  app_service_vnet_integration_subnet_id = var.app_service_vnet_integration_subnet_id
-  app_service_pe_subnet_id               = var.app_service_pe_subnet_id
-  privatedns_resource_group_name         = var.privatedns_resource_group_name
+  vnet_integration_subnet_id = var.vnet_integration_subnet_id
+  vnet_image_pull_enabled    = var.vnet_image_pull_enabled
+  app_service_pe_subnet_id           = var.app_service_pe_subnet_id
+  privatedns_resource_group_name = var.privatedns_resource_group_name
 
   backup_enabled                   = var.backup_enabled
   backup_custom_name               = var.backup_custom_name
-  backup_storage_account_rg        = var.backup_storage_account_rg
-  backup_storage_account_name      = var.backup_storage_account_name
+  backup_storage_account_id        = var.backup_storage_account_id
   backup_storage_account_container = var.backup_storage_account_container
   backup_frequency_interval        = var.backup_frequency_interval
   backup_retention_period_in_days  = var.backup_retention_period_in_days
   backup_frequency_unit            = var.backup_frequency_unit
   backup_keep_at_least_one_backup  = var.backup_keep_at_least_one_backup
+  backup_token_start_date          = var.backup_token_start_date
 
-  application_insights_custom_name         = var.application_insights_custom_name
-  application_insights_sampling_percentage = var.application_insights_sampling_percentage
-  application_insights_id                  = var.application_insights_id
-  application_insights_enabled             = var.application_insights_enabled
-  application_insights_type                = var.application_insights_type
-  application_insights_workspace_id        = var.application_insights_workspace_id
+  application_insights = var.application_insights
 
-  app_service_logs = var.app_service_logs
+  auto_heal_setting = var.auto_heal_setting
 
-  identity                = var.identity
-  vnet_image_pull_enabled = var.vnet_image_pull_enabled
+  logs = var.logs
+
+  key_vault_reference_identity_id = var.key_vault_reference_identity_id
+  identity                        = var.identity
 
   logs_destinations_ids   = var.logs_destinations_ids
   logs_categories         = var.logs_categories
@@ -97,34 +103,48 @@ module "linux_web_app" {
 
   default_tags_enabled = var.default_tags_enabled
   extra_tags           = var.extra_tags
+}
+
+moved {
+  from = module.linux_web_app["enabled"]
+  to   = module.linux_web_app[0]
+}
+
+resource "null_resource" "fake_webapp_container_condition" {
+  count = lower(var.os_type) == "linuxcontainer" ? 1 : 0
+
+  triggers = {
+    webapp_type = var.os_type
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.docker_image != null
+      error_message = "Variable `docker_image` must be set when `os_type` App Service variable is in 'LinuxContainer' mode."
+    }
+  }
 }
 
 module "container_web_app" {
-  for_each = toset(lower(var.os_type) == "container" ? ["enabled"] : [])
+  count = lower(var.os_type) == "linuxcontainer" ? 1 : 0
 
   source = "./modules/container-web-app"
 
-  providers = {
-    azurerm = azurerm
-  }
-
-  workload = var.workload
-
-  unique              = var.unique
+  client_name         = var.client_name
+  environment         = var.environment
   location            = var.location
   location_short      = var.location_short
   resource_group_name = var.resource_group_name
+  stack               = var.stack
 
-  use_caf_naming                  = var.use_caf_naming
   name_prefix                     = var.name_prefix
   name_suffix                     = var.name_suffix
-  app_service_custom_name         = var.app_service_custom_name
-  custom_diagnostic_settings_name = var.custom_diagnostic_settings_name
+  custom_name                     = var.app_service_custom_name
+  diagnostic_settings_custom_name = var.diagnostic_settings_custom_name
 
-  service_plan_id                = local.service_plan_id
-  web_app_key_vault_id           = var.web_app_key_vault_id
-  skip_identity_role_assignments = var.skip_identity_role_assignments
-  docker_image                   = var.docker_image
+  service_plan_id = local.service_plan_id
+
+  docker_image = var.docker_image
 
   app_settings       = var.app_settings
   site_config        = var.site_config
@@ -134,6 +154,7 @@ module "container_web_app" {
   sticky_settings    = var.sticky_settings
 
   mount_points               = var.mount_points
+  staging_slot_mount_points  = var.staging_slot_mount_points
   client_affinity_enabled    = var.client_affinity_enabled
   https_only                 = var.https_only
   client_certificate_enabled = var.client_certificate_enabled
@@ -141,43 +162,44 @@ module "container_web_app" {
   staging_slot_enabled             = var.staging_slot_enabled
   staging_slot_custom_name         = var.staging_slot_custom_name
   staging_slot_custom_app_settings = var.staging_slot_custom_app_settings
+  staging_slot_site_config         = var.staging_slot_site_config
 
-  custom_domains                = var.custom_domains
+  custom_domains = var.custom_domains
+  certificates   = var.certificates
+
   public_network_access_enabled = local.public_network_access_enabled
-  authorized_ips                = local.authorized_ips
+  allowed_cidrs                 = local.allowed_cidrs
   ip_restriction_headers        = var.ip_restriction_headers
-  authorized_subnet_ids         = var.authorized_subnet_ids
-  authorized_service_tags       = var.authorized_service_tags
+  allowed_subnet_ids            = var.allowed_subnet_ids
+  allowed_service_tags          = var.allowed_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_authorized_ips            = local.scm_authorized_ips
-  scm_authorized_subnet_ids     = var.scm_authorized_subnet_ids
-  scm_authorized_service_tags   = var.scm_authorized_service_tags
+  scm_allowed_cidrs             = local.scm_allowed_cidrs
+  scm_allowed_subnet_ids        = var.scm_allowed_subnet_ids
+  scm_allowed_service_tags      = var.scm_allowed_service_tags
 
-  app_service_vnet_integration_subnet_id = var.app_service_vnet_integration_subnet_id
-  app_service_pe_subnet_id               = var.app_service_pe_subnet_id
-  privatedns_resource_group_name         = var.privatedns_resource_group_name
+  vnet_integration_subnet_id = var.vnet_integration_subnet_id
+  vnet_image_pull_enabled    = var.vnet_image_pull_enabled
+  app_service_pe_subnet_id           = var.app_service_pe_subnet_id
+  privatedns_resource_group_name = var.privatedns_resource_group_name
 
   backup_enabled                   = var.backup_enabled
   backup_custom_name               = var.backup_custom_name
-  backup_storage_account_rg        = var.backup_storage_account_rg
-  backup_storage_account_name      = var.backup_storage_account_name
+  backup_storage_account_id        = var.backup_storage_account_id
   backup_storage_account_container = var.backup_storage_account_container
   backup_frequency_interval        = var.backup_frequency_interval
   backup_retention_period_in_days  = var.backup_retention_period_in_days
   backup_frequency_unit            = var.backup_frequency_unit
   backup_keep_at_least_one_backup  = var.backup_keep_at_least_one_backup
+  backup_token_start_date          = var.backup_token_start_date
 
-  application_insights_custom_name         = var.application_insights_custom_name
-  application_insights_sampling_percentage = var.application_insights_sampling_percentage
-  application_insights_id                  = var.application_insights_id
-  application_insights_enabled             = var.application_insights_enabled
-  application_insights_type                = var.application_insights_type
-  application_insights_workspace_id        = var.application_insights_workspace_id
+  application_insights = var.application_insights
 
-  app_service_logs = var.app_service_logs
+  auto_heal_setting = var.auto_heal_setting
 
-  identity                = var.identity
-  vnet_image_pull_enabled = var.vnet_image_pull_enabled
+  logs = var.logs
+
+  key_vault_reference_identity_id = var.key_vault_reference_identity_id
+  identity                        = var.identity
 
   logs_destinations_ids   = var.logs_destinations_ids
   logs_categories         = var.logs_categories
@@ -187,31 +209,29 @@ module "container_web_app" {
   extra_tags           = var.extra_tags
 }
 
+moved {
+  from = module.container_web_app["enabled"]
+  to   = module.container_web_app[0]
+}
+
 module "windows_web_app" {
-  for_each = toset(lower(var.os_type) == "windows" ? ["enabled"] : [])
+  count = lower(var.os_type) == "windows" ? 1 : 0
 
   source = "./modules/windows-web-app"
 
-  providers = {
-    azurerm = azurerm
-  }
-
-  workload = var.workload
-
-  unique              = var.unique
+  client_name         = var.client_name
+  environment         = var.environment
   location            = var.location
   location_short      = var.location_short
   resource_group_name = var.resource_group_name
+  stack               = var.stack
 
-  use_caf_naming                  = var.use_caf_naming
   name_prefix                     = var.name_prefix
   name_suffix                     = var.name_suffix
-  app_service_custom_name         = var.app_service_custom_name
-  custom_diagnostic_settings_name = var.custom_diagnostic_settings_name
+  custom_name                     = var.app_service_custom_name
+  diagnostic_settings_custom_name = var.diagnostic_settings_custom_name
 
-  service_plan_id                = local.service_plan_id
-  web_app_key_vault_id           = var.web_app_key_vault_id
-  skip_identity_role_assignments = var.skip_identity_role_assignments
+  service_plan_id = local.service_plan_id
 
   app_settings       = var.app_settings
   site_config        = var.site_config
@@ -221,6 +241,7 @@ module "windows_web_app" {
   sticky_settings    = var.sticky_settings
 
   mount_points               = var.mount_points
+  staging_slot_mount_points  = var.staging_slot_mount_points
   client_affinity_enabled    = var.client_affinity_enabled
   https_only                 = var.https_only
   client_certificate_enabled = var.client_certificate_enabled
@@ -228,42 +249,43 @@ module "windows_web_app" {
   staging_slot_enabled             = var.staging_slot_enabled
   staging_slot_custom_name         = var.staging_slot_custom_name
   staging_slot_custom_app_settings = var.staging_slot_custom_app_settings
+  staging_slot_site_config         = var.staging_slot_site_config
 
-  custom_domains                = var.custom_domains
+  custom_domains = var.custom_domains
+  certificates   = var.certificates
+
   public_network_access_enabled = local.public_network_access_enabled
-  authorized_ips                = local.authorized_ips
+  allowed_cidrs                 = local.allowed_cidrs
   ip_restriction_headers        = var.ip_restriction_headers
-  authorized_subnet_ids         = var.authorized_subnet_ids
-  authorized_service_tags       = var.authorized_service_tags
+  allowed_subnet_ids            = var.allowed_subnet_ids
+  allowed_service_tags          = var.allowed_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_authorized_ips            = local.scm_authorized_ips
-  scm_authorized_subnet_ids     = var.scm_authorized_subnet_ids
-  scm_authorized_service_tags   = var.scm_authorized_service_tags
+  scm_allowed_cidrs             = local.scm_allowed_cidrs
+  scm_allowed_subnet_ids        = var.scm_allowed_subnet_ids
+  scm_allowed_service_tags      = var.scm_allowed_service_tags
 
-  app_service_vnet_integration_subnet_id = var.app_service_vnet_integration_subnet_id
-  app_service_pe_subnet_id               = var.app_service_pe_subnet_id
-  privatedns_resource_group_name         = var.privatedns_resource_group_name
+  vnet_integration_subnet_id = var.vnet_integration_subnet_id
+  app_service_pe_subnet_id           = var.app_service_pe_subnet_id
+  privatedns_resource_group_name = var.privatedns_resource_group_name
 
   backup_enabled                   = var.backup_enabled
   backup_custom_name               = var.backup_custom_name
-  backup_storage_account_rg        = var.backup_storage_account_rg
-  backup_storage_account_name      = var.backup_storage_account_name
+  backup_storage_account_id        = var.backup_storage_account_id
   backup_storage_account_container = var.backup_storage_account_container
   backup_frequency_interval        = var.backup_frequency_interval
   backup_retention_period_in_days  = var.backup_retention_period_in_days
   backup_frequency_unit            = var.backup_frequency_unit
   backup_keep_at_least_one_backup  = var.backup_keep_at_least_one_backup
+  backup_token_start_date          = var.backup_token_start_date
 
-  application_insights_custom_name         = var.application_insights_custom_name
-  application_insights_sampling_percentage = var.application_insights_sampling_percentage
-  application_insights_id                  = var.application_insights_id
-  application_insights_workspace_id        = var.application_insights_workspace_id
-  application_insights_enabled             = var.application_insights_enabled
-  application_insights_type                = var.application_insights_type
+  application_insights = var.application_insights
 
-  app_service_logs = var.app_service_logs
+  auto_heal_setting = var.auto_heal_setting
 
-  identity = var.identity
+  logs = var.logs
+
+  key_vault_reference_identity_id = var.key_vault_reference_identity_id
+  identity                        = var.identity
 
   logs_destinations_ids   = var.logs_destinations_ids
   logs_categories         = var.logs_categories
@@ -271,4 +293,9 @@ module "windows_web_app" {
 
   default_tags_enabled = var.default_tags_enabled
   extra_tags           = var.extra_tags
+}
+
+moved {
+  from = module.windows_web_app["enabled"]
+  to   = module.windows_web_app[0]
 }

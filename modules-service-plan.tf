@@ -1,22 +1,25 @@
 # Service Plan
 module "service_plan" {
-  for_each = toset(var.service_plan_id == null ? ["enabled"] : [])
-  source   = "miljodir/app-service-plan/azurerm"
-  version  = "~> 1.0"
+  count = var.service_plan_id == null ? 1 : 0
 
+  source  = "claranet/app-service-plan/azurerm"
+  version = "~> 8.3.0"
+
+  client_name         = var.client_name
+  environment         = var.environment
+  stack               = var.stack
   resource_group_name = var.resource_group_name
-  workload            = var.workload
   location            = var.location
   location_short      = var.location_short
 
-  use_caf_naming                  = var.use_caf_naming
   name_prefix                     = var.name_prefix
   name_suffix                     = var.name_suffix
   custom_name                     = var.service_plan_custom_name
-  custom_diagnostic_settings_name = var.custom_diagnostic_settings_name
+  diagnostic_settings_custom_name = var.diagnostic_settings_custom_name
 
-  os_type  = lower(var.os_type) == "container" ? "Linux" : var.os_type
-  sku_name = var.sku_name
+  os_type                = lower(var.os_type) == "linuxcontainer" ? "Linux" : var.os_type
+  sku_name               = var.sku_name
+  zone_balancing_enabled = var.zone_balancing_enabled
 
   app_service_environment_id   = var.app_service_environment_id
   worker_count                 = var.worker_count
@@ -35,7 +38,11 @@ module "service_plan" {
   )
 }
 
+locals {
+  service_plan_id = coalesce(var.service_plan_id, one(module.service_plan[*].id))
+}
+
 moved {
-  from = module.service_plan
-  to   = module.service_plan["enabled"]
+  from = module.service_plan["enabled"]
+  to   = module.service_plan[0]
 }

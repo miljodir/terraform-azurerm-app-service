@@ -1,53 +1,17 @@
-module "azure_region" {
-  source  = "claranet/regions/azurerm"
-  version = "x.x.x"
-
-  azure_region = var.azure_region
-}
-
-resource "azurerm_resource_group" "rg" {
-  name     = "my-rg"
-  location = module.azure_region.location
-  lifecycle {
-    ignore_changes = [tags]
-  }
-}
-
-module "logs" {
-  source  = "claranet/run/azurerm//modules/logs"
-  version = "x.x.x"
-
-  location            = module.azure_region.location
-  location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
-}
-
-resource "azurerm_storage_account" "assets_storage" {
-  account_replication_type = "LRS"
-  account_tier             = "Standard"
-  location                 = module.azure_region.location
-  name                     = "appserviceassets"
-  resource_group_name      = module.rg.resource_group_name
-  min_tls_version          = "TLS1_2"
-}
-
-resource "azurerm_storage_share" "assets_share" {
-  name                 = "assets"
-  storage_account_name = azurerm_storage_account.assets_storage.name
-  quota                = 50
-}
-
 module "service_plan" {
-  source  = "miljodir/app-service-plan/azurerm"
+  source  = "claranet/app-service-plan/azurerm"
   version = "x.x.x"
 
+  client_name         = var.client_name
+  environment         = var.environment
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
+  resource_group_name = module.rg.name
+  stack               = var.stack
 
   logs_destinations_ids = [
-    module.logs.logs_storage_account_id,
-    module.logs.log_analytics_workspace_id,
+    module.run.logs_storage_account_id,
+    module.run.log_analytics_workspace_id,
   ]
 
   os_type  = "Linux"
@@ -55,31 +19,35 @@ module "service_plan" {
 }
 
 module "container_web_app" {
-  source  = "miljodir/app-service/azurerm//modules/container-web-app"
+  source  = "claranet/app-service/azurerm//modules/container-web-app"
   version = "x.x.x"
 
+  client_name         = var.client_name
+  environment         = var.environment
   location            = module.azure_region.location
   location_short      = module.azure_region.location_short
-  resource_group_name = module.rg.resource_group_name
+  resource_group_name = module.rg.name
+  stack               = var.stack
 
-  service_plan_id = local.service_plan_id
+  service_plan_id = module.service_plan.id
 
   app_settings = {
-    DOCKER_REGISTRY_SERVER_URL = "https://myacr.azurecr.io"
-    FOO                        = "bar"
+    "DOCKER_ENABLE_CI" = true
+    "FOO"              = "bar"
   }
 
   docker_image = {
-    name = "myimage"
-    tag  = "latest"
+    name     = "myapp"
+    tag      = "latest"
+    registry = "https://${module.acr.fqdn}"
   }
 
   site_config = {
-    linux_fx_version = "DOCKER|myacr.azurecr.io/myrepository/image:tag"
-    http2_enabled    = true
+    http2_enabled = true
 
     # The "AcrPull" role must be assigned to the managed identity in the target Azure Container Registry
-    acr_use_managed_identity_credentials = true
+    container_registry_use_managed_identity = true
+    # container_registry_managed_identity_client_id = "my_user_assigned_managed_identity_client_id"
   }
 
   auth_settings = {
@@ -111,7 +79,8 @@ module "container_web_app" {
     }
   }
 
-  authorized_ips = ["1.2.3.4/32", "4.3.2.1/32"]
+  allowed_cidrs     = ["1.2.3.4/32", "4.3.2.1/32"]
+  scm_allowed_cidrs = ["1.2.3.4/32", "4.3.2.1/32"]
 
   ip_restriction_headers = {
     x_forwarded_host = ["myhost1.fr", "myhost2.fr"]
@@ -138,7 +107,56 @@ module "container_web_app" {
   ]
 
   logs_destinations_ids = [
-    module.logs.logs_storage_account_id,
-    module.logs.log_analytics_workspace_id,
+    module.run.logs_storage_account_id,
+    module.run.log_analytics_workspace_id,
   ]
+}
+
+module "acr" {
+  source  = "claranet/acr/azurerm"
+  version = "x.x.x"
+
+  client_name         = var.client_name
+  environment         = var.environment
+  stack               = var.stack
+  location            = module.azure_region.location
+  location_short      = module.azure_region.location_short
+  resource_group_name = module.rg.name
+  sku                 = "Standard"
+
+  azure_services_bypass_allowed = true
+
+  logs_destinations_ids = [
+    module.run.logs_storage_account_id,
+    module.run.log_analytics_workspace_id,
+  ]
+
+  extra_tags = {
+    foo = "bar"
+  }
+}
+
+resource "azurerm_role_assignment" "webapp_acr_pull" {
+  scope                = module.acr.id
+  principal_id         = module.container_web_app.identity_principal_id
+  role_definition_name = "AcrPull"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "azurerm_container_registry_webhook" "webhook" {
+  name = "webapp${replace(module.container_web_app.name, "/-|_|\\W/", "")}"
+
+  resource_group_name = module.rg.name
+  location            = module.azure_region.location
+
+  registry_name = module.acr.name
+
+  service_uri    = "https://${module.container_web_app.site_credential[0].name}:${module.container_web_app.site_credential[0].password}@${module.container_web_app.name}.scm.azurewebsites.net/api/registry/webhook"
+  status         = "enabled"
+  scope          = "myapp:latest"
+  actions        = ["push"]
+  custom_headers = {}
 }
