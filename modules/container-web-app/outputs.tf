@@ -61,7 +61,7 @@ output "site_credential" {
 
 output "identity_principal_id" {
   description = "ID of the system principal identity of the App Service."
-  value       = azurerm_linux_web_app.main.identity[0].principal_id
+  value       = try(azurerm_linux_web_app.main.identity[0].principal_id, null)
 }
 
 output "certificates_id" {
