@@ -1,3 +1,28 @@
+locals {
+  public_network_access_enabled = lower(var.environment) == "d" || var.public_network_access_enabled
+
+  allowed_cidrs = [
+    for cidr in (
+      local.public_network_access_enabled
+      ? try(concat(values(module.network_vars[0].known_public_ips), var.allowed_cidrs), values(module.network_vars[0].known_public_ips))
+      : []
+    ) : can(regex(".*\\/\\d+$", cidr)) ? cidr : format("%s/32", cidr)
+  ]
+
+  scm_allowed_cidrs = [
+    for cidr in (
+      local.public_network_access_enabled
+      ? try(concat(values(module.network_vars[0].known_public_ips), var.scm_allowed_cidrs), values(module.network_vars[0].known_public_ips))
+      : []
+    ) : can(regex(".*\\/\\d+$", cidr)) ? cidr : format("%s/32", cidr)
+  ]
+}
+
+module "network_vars" {
+  count  = local.public_network_access_enabled ? 1 : 0
+  source = "git@github.com:miljodir/cp-shared.git//modules/public_nw_ips?ref=public_nw_ips/v1"
+}
+
 module "linux_web_app" {
   count = lower(var.os_type) == "linux" ? 1 : 0
 
@@ -38,13 +63,13 @@ module "linux_web_app" {
   custom_domains = var.custom_domains
   certificates   = var.certificates
 
-  public_network_access_enabled = var.public_network_access_enabled
-  allowed_cidrs                 = var.allowed_cidrs
+  public_network_access_enabled = local.public_network_access_enabled
+  allowed_cidrs                 = local.allowed_cidrs
   ip_restriction_headers        = var.ip_restriction_headers
   allowed_subnet_ids            = var.allowed_subnet_ids
   allowed_service_tags          = var.allowed_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_allowed_cidrs             = var.scm_allowed_cidrs
+  scm_allowed_cidrs             = local.scm_allowed_cidrs
   scm_allowed_subnet_ids        = var.scm_allowed_subnet_ids
   scm_allowed_service_tags      = var.scm_allowed_service_tags
 
@@ -142,13 +167,13 @@ module "container_web_app" {
   custom_domains = var.custom_domains
   certificates   = var.certificates
 
-  public_network_access_enabled = var.public_network_access_enabled
-  allowed_cidrs                 = var.allowed_cidrs
+  public_network_access_enabled = local.public_network_access_enabled
+  allowed_cidrs                 = local.allowed_cidrs
   ip_restriction_headers        = var.ip_restriction_headers
   allowed_subnet_ids            = var.allowed_subnet_ids
   allowed_service_tags          = var.allowed_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_allowed_cidrs             = var.scm_allowed_cidrs
+  scm_allowed_cidrs             = local.scm_allowed_cidrs
   scm_allowed_subnet_ids        = var.scm_allowed_subnet_ids
   scm_allowed_service_tags      = var.scm_allowed_service_tags
 
@@ -229,13 +254,13 @@ module "windows_web_app" {
   custom_domains = var.custom_domains
   certificates   = var.certificates
 
-  public_network_access_enabled = var.public_network_access_enabled
-  allowed_cidrs                 = var.allowed_cidrs
+  public_network_access_enabled = local.public_network_access_enabled
+  allowed_cidrs                 = local.allowed_cidrs
   ip_restriction_headers        = var.ip_restriction_headers
   allowed_subnet_ids            = var.allowed_subnet_ids
   allowed_service_tags          = var.allowed_service_tags
   scm_ip_restriction_headers    = var.scm_ip_restriction_headers
-  scm_allowed_cidrs             = var.scm_allowed_cidrs
+  scm_allowed_cidrs             = local.scm_allowed_cidrs
   scm_allowed_subnet_ids        = var.scm_allowed_subnet_ids
   scm_allowed_service_tags      = var.scm_allowed_service_tags
 

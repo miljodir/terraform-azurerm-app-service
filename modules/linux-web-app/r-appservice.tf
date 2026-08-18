@@ -11,6 +11,8 @@ resource "azurerm_linux_web_app" "main" {
 
   public_network_access_enabled = var.public_network_access_enabled
   virtual_network_subnet_id     = var.vnet_integration_subnet_id
+  ftp_publish_basic_authentication_enabled       = lookup(local.site_config, "ftp_publish_basic_authentication_enabled", false)
+  webdeploy_publish_basic_authentication_enabled = lookup(local.site_config, "webdeploy_publish_basic_authentication_enabled", false)
   vnet_image_pull_enabled       = var.vnet_image_pull_enabled
 
   dynamic "site_config" {
@@ -25,10 +27,11 @@ resource "azurerm_linux_web_app" "main" {
       ftps_state                        = lookup(site_config.value, "ftps_state", "Disabled")
       health_check_path                 = lookup(site_config.value, "health_check_path", null)
       health_check_eviction_time_in_min = lookup(site_config.value, "health_check_eviction_time_in_min", null)
-      http2_enabled                     = lookup(site_config.value, "http2_enabled", null)
+      http2_enabled                     = lookup(site_config.value, "http2_enabled", startswith(local.name, "d-") ? true : null)
       local_mysql_enabled               = lookup(site_config.value, "local_mysql_enabled", false)
       managed_pipeline_mode             = lookup(site_config.value, "managed_pipeline_mode", null)
       minimum_tls_version               = lookup(site_config.value, "minimum_tls_version", lookup(site_config.value, "min_tls_version", "1.2"))
+      minimum_tls_cipher_suite          = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
       remote_debugging_enabled          = lookup(site_config.value, "remote_debugging_enabled", false)
       remote_debugging_version          = lookup(site_config.value, "remote_debugging_version", null)
       use_32_bit_worker                 = lookup(site_config.value, "use_32_bit_worker", false)
@@ -64,8 +67,8 @@ resource "azurerm_linux_web_app" "main" {
       }
 
       scm_type                    = lookup(site_config.value, "scm_type", null)
-      scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", "1.2")
-      scm_use_main_ip_restriction = length(var.scm_allowed_cidrs) > 0 || length(var.scm_allowed_subnet_ids) > 0 ? false : true
+      scm_minimum_tls_version     = lookup(site_config.value, "scm_minimum_tls_version", "1.3")
+      scm_use_main_ip_restriction = (length(var.scm_allowed_cidrs) > 0 || length(var.scm_allowed_subnet_ids) > 0) && var.app_service_pe_subnet_id == null ? false : true
 
       vnet_route_all_enabled = var.vnet_integration_subnet_id != null
 
