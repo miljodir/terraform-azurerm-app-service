@@ -31,6 +31,11 @@ resource "azurerm_application_insights" "main" {
   )
 
   lifecycle {
+    ignore_changes = [
+      application_type,
+      name,
+    ]
+
     precondition {
       condition     = var.application_insights.enabled && var.application_insights.log_analytics_workspace_id != null
       error_message = "var.application_insights.log_analytics_workspace_id is mandatory when Application Insights is enabled."

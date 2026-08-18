@@ -6,7 +6,7 @@ locals {
   name              = coalesce(var.custom_name, data.azurecaf_name.app_service_web.result)
   staging_slot_name = coalesce(var.staging_slot_custom_name, "staging-slot")
 
-  application_insights_name = coalesce(var.application_insights_custom_name, data.azurecaf_name.application_insights.result)
+  application_insights_name = coalesce(var.application_insights_custom_name, "${local.name}-ai")
 
   backup_name = coalesce(var.backup_custom_name, "DefaultBackup")
 }
