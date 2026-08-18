@@ -15,7 +15,7 @@ module "linux_web_app" {
   custom_name                     = var.app_service_custom_name
   diagnostic_settings_custom_name = var.diagnostic_settings_custom_name
 
-  service_plan_id = module.service_plan.id
+  service_plan_id = local.service_plan_id
 
   app_settings       = var.app_settings
   site_config        = var.site_config
@@ -117,7 +117,7 @@ module "container_web_app" {
   custom_name                     = var.app_service_custom_name
   diagnostic_settings_custom_name = var.diagnostic_settings_custom_name
 
-  service_plan_id = module.service_plan.id
+  service_plan_id = local.service_plan_id
 
   docker_image = var.docker_image
 
@@ -206,7 +206,7 @@ module "windows_web_app" {
   custom_name                     = var.app_service_custom_name
   diagnostic_settings_custom_name = var.diagnostic_settings_custom_name
 
-  service_plan_id = module.service_plan.id
+  service_plan_id = local.service_plan_id
 
   app_settings       = var.app_settings
   site_config        = var.site_config

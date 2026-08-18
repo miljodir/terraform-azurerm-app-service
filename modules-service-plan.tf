@@ -1,5 +1,7 @@
 # Service Plan
 module "service_plan" {
+  count = var.service_plan_id == null ? 1 : 0
+
   source  = "claranet/app-service-plan/azurerm"
   version = "~> 8.3.0"
 
@@ -34,4 +36,13 @@ module "service_plan" {
     var.extra_tags,
     var.service_plan_extra_tags,
   )
+}
+
+locals {
+  service_plan_id = coalesce(var.service_plan_id, one(module.service_plan[*].id))
+}
+
+moved {
+  from = module.service_plan["enabled"]
+  to   = module.service_plan[0]
 }

@@ -1,3 +1,9 @@
+variable "service_plan_id" {
+  description = "ID of an existing Service Plan to host the App Service. A Service Plan is created when this is null."
+  type        = string
+  default     = null
+}
+
 variable "os_type" {
   description = "The O/S type for the App Services to be hosted in this plan. Possible values include `Windows`, `Linux`, `LinuxContainer` and `WindowsContainer`."
   type        = string
