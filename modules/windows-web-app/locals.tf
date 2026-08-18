@@ -1,7 +1,7 @@
 locals {
   default_site_config = {
     always_on               = "true"
-    scm_minimum_tls_version = "1.2"
+    scm_minimum_tls_version = "1.3"
   }
 
   default_slot_site_config = local.default_site_config
